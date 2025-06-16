@@ -1,0 +1,11 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.BaseFunction = void 0;
+const constructs_1 = require("constructs");
+class BaseFunction extends constructs_1.Construct {
+    constructor(scope, id) {
+        super(scope, id);
+    }
+}
+exports.BaseFunction = BaseFunction;
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiX2Z1bmN0aW9uLWJhc2UuanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyJfZnVuY3Rpb24tYmFzZS50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOzs7QUFBQSwyQ0FBc0M7QUFHdEMsTUFBYSxZQUFhLFNBQVEsc0JBQVM7SUFJekMsWUFBWSxLQUFnQixFQUFFLEVBQVU7UUFDdEMsS0FBSyxDQUFDLEtBQUssRUFBRSxFQUFFLENBQUMsQ0FBQTtJQUNsQixDQUFDO0NBQ0Y7QUFQRCxvQ0FPQyIsInNvdXJjZXNDb250ZW50IjpbImltcG9ydCB7IENvbnN0cnVjdCB9IGZyb20gJ2NvbnN0cnVjdHMnXG5pbXBvcnQgeyBGdW5jdGlvbiB9IGZyb20gJ2F3cy1jZGstbGliL2F3cy1sYW1iZGEnXG5cbmV4cG9ydCBjbGFzcyBCYXNlRnVuY3Rpb24gZXh0ZW5kcyBDb25zdHJ1Y3Qge1xuICBmdW5jdGlvbjogRnVuY3Rpb25cbiAgZnVuY3Rpb25JZDogc3RyaW5nXG5cbiAgY29uc3RydWN0b3Ioc2NvcGU6IENvbnN0cnVjdCwgaWQ6IHN0cmluZykge1xuICAgIHN1cGVyKHNjb3BlLCBpZClcbiAgfVxufVxuIl19
