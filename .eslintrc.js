@@ -2,9 +2,13 @@
 /** @type {import("eslint").Linter.Config} */
 module.exports = {
   ignorePatterns: ["apps/**", "packages/**"],
-  extends: ["@workspace/eslint-config/library.js"],
-  parser: "@typescript-eslint/parser",
+  extends: ["eslint:recommended"],
+  env: {
+    node: true,
+    es2022: true,
+  },
   parserOptions: {
-    project: true,
+    ecmaVersion: "latest",
+    sourceType: "module",
   },
 }
