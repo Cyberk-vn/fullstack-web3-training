@@ -27,8 +27,8 @@ describe("Number Utilities", () => {
 
     it("should handle invalid values", () => {
       expect(formatNumber(NaN)).toBe("");
-      expect(formatNumber(null as any)).toBe("");
-      expect(formatNumber(undefined as any)).toBe("");
+      expect(formatNumber(null as unknown as number)).toBe("");
+      expect(formatNumber(undefined as unknown as number)).toBe("");
     });
   });
 
