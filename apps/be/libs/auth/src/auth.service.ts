@@ -172,7 +172,10 @@ export class AuthService {
     if (options.updateLastLogin) {
       await this._userService.update(user.id, { lastLoginAt: new Date() })
     }
-    const profile = await this._profileService.findOne(user.profileId)
+    let profile
+    if (user.profileId) {
+      profile = await this._profileService.findOne(user.profileId)
+    }
     return th.toInstanceSafe(TokenResDto, {
       jwt: this.jwtService.sign(
         { ...payload },
@@ -189,7 +192,7 @@ export class AuthService {
         },
       ),
       user: th.toInstanceSafe(UserEntity, user),
-      profile: th.toInstanceSafe(ProfileEntity, profile),
+      profile: profile,
     })
   }
 
@@ -224,9 +227,11 @@ export class AuthService {
 
   async callback(provider: SocialProviderType, accessToken: string) {
     const profile = await this._providerRegister.run(provider, accessToken)
+
     let user = await this._userService.findUser(profile.email, provider, {
       advantage: true,
     })
+
     if (!user) {
       user = await this._userService.create({
         username: profile.email,
