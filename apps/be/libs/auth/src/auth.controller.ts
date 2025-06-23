@@ -125,6 +125,7 @@ export class AuthController {
   @ApiOkResponse({ type: TokenResDto })
   @Get(':provider/callback')
   socialCallback(@Param('provider') provider: SocialProviderType, @Query('access_token') accessToken: string) {
+    console.log(`Social callback for provider: ${provider}, accessToken: ${accessToken}`)
     return this.authService.callback(provider, accessToken)
   }
 
