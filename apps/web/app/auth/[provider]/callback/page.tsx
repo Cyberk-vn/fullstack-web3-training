@@ -17,7 +17,7 @@ export default function AuthCallbackPage() {
         const fragment = window.location.hash.substring(1);
         const params = new URLSearchParams(fragment);
         const accessToken = params.get("access_token");
-        
+
         if (accessToken && provider) {
           const response = await authCallback({
             accessToken,
@@ -30,7 +30,7 @@ export default function AuthCallbackPage() {
             if (response.jwtRefresh) {
               localStorage.setItem("jwtRefresh", response.jwtRefresh);
             }
-            
+
             // Redirect to home page
             router.push(ROUTES.HOME);
           } else {
@@ -58,9 +58,7 @@ export default function AuthCallbackPage() {
             <h2 className="mt-6 text-3xl font-bold text-red-600">
               Authentication Error
             </h2>
-            <p className="mt-2 text-sm text-gray-600">
-              {error}
-            </p>
+            <p className="mt-2 text-sm text-gray-600">{error}</p>
             <button
               onClick={() => router.push(ROUTES.AUTH)}
               className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"

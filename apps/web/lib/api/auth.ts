@@ -14,4 +14,4 @@ export const authCallback = async ({
     }
   );
   return response.data;
-}; 
+};

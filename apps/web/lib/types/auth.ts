@@ -9,4 +9,4 @@ export interface TokenResponse {
 export interface AuthCallbackParams {
   accessToken: string;
   provider: string;
-} 
+}
