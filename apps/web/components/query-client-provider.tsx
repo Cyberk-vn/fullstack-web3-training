@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "@workspace/ui/globals.css";
 import { Providers } from "@/components/providers";
 import { headers } from "next/headers";
+import ContextProvider from "@/components/app-kit-provider";
 
 const fontSans = Geist({
   subsets: ["latin"],
@@ -21,13 +22,14 @@ export default async function RootLayout({
 }>) {
   const headerObj = await headers();
   const cookies = headerObj.get("cookie");
-
   return (
     <html lang="en" suppressHydrationWarning>
       <body
         className={`${fontSans.variable} ${fontMono.variable} font-sans antialiased `}
       >
-        <Providers cookies={cookies}>{children}</Providers>
+        <Providers>
+          <ContextProvider cookies={cookies}>{children}</ContextProvider>
+        </Providers>
       </body>
     </html>
   );

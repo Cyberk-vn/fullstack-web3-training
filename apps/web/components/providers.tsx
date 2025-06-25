@@ -2,8 +2,14 @@
 
 import * as React from "react";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
+import ContextProvider from "@/components/app-kit-provider";
 
-export function Providers({ children }: { children: React.ReactNode }) {
+interface ProvidersProps {
+  children: React.ReactNode;
+  cookies?: string | null;
+}
+
+export function Providers({ children, cookies = null }: ProvidersProps) {
   return (
     <NextThemesProvider
       attribute="class"
@@ -12,7 +18,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       disableTransitionOnChange
       enableColorScheme
     >
-      {children}
+      <ContextProvider cookies={cookies}>{children}</ContextProvider>
     </NextThemesProvider>
   );
 }
