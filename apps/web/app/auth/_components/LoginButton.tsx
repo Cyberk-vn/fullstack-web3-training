@@ -1,26 +1,26 @@
 "use client";
 
 import { Button } from "@workspace/ui/components/button";
-import { CLIENT_ID, REDIRECT_URL } from "../../../lib/constants/auth/auth";
+import { getClientId, getRedirectUrl, SCOPE } from "../../../lib/constants/auth/auth";
 
 export const LoginButton = () => {
-  const signIn = () => {
-    const authUrl = new URL("https://accounts.google.com/o/oauth2/v2/auth");
-    authUrl.searchParams.append("client_id", CLIENT_ID);
-    authUrl.searchParams.append("redirect_uri", REDIRECT_URL);
-    authUrl.searchParams.append("response_type", "token");
-    authUrl.searchParams.append("scope", "profile email openid");
+  const signInWithGoogle = () => {
+    const clientId = getClientId();
+    const redirectUri = getRedirectUrl("google");
+    const scope = SCOPE;
+    const responseType = "token";
 
-    window.location.href = authUrl.toString();
+    const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=${responseType}&scope=${scope}`;
+    
+    window.location.href = authUrl;
   };
+
   return (
     <Button
       variant="default"
       size="lg"
-      onClick={() => {
-        signIn();
-      }}
-      className="w-full hover:bg-gray-300 bg-gray-200"
+      onClick={signInWithGoogle}
+      className="w-full hover:bg-blue-600 bg-blue-500 text-white"
     >
       Sign in with Google
     </Button>

@@ -4,6 +4,7 @@ import { UserProvider, Prisma, Role } from '@prisma/client'
 import { PrismaService } from 'nestjs-prisma'
 import { UserEntity } from './entities/user.entity'
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
+import isEmail from 'validator/lib/isEmail'
 
 @Injectable()
 export class UserService {
@@ -14,8 +15,29 @@ export class UserService {
    */
   async create(createUserDto: Prisma.UserCreateInput): Promise<UserEntity> {
     let user: UserEntity
+    let name = createUserDto.name,
+      email = null
+
+    if (isEmail(createUserDto.username)) {
+      name = name || createUserDto.username.split('@')[0]
+      email = createUserDto.username
+    }
+
     try {
-      user = th.toInstanceUnsafe(UserEntity, await this.prisma.user.create({ data: createUserDto }))
+      user = th.toInstanceUnsafe(
+        UserEntity,
+        await this.prisma.user.create({
+          data: {
+            ...createUserDto,
+            profile: {
+              create: {
+                name,
+                email,
+              },
+            },
+          },
+        }),
+      )
     } catch (err) {
       const error = err as PrismaClientKnownRequestError
       if (error.message.includes('Unique constraint failed on the fields: (`username`,`provider`)')) {
