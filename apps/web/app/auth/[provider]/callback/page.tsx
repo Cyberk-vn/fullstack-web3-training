@@ -22,6 +22,7 @@ export default function AuthCallbackPage() {
         });
 
         if (response.jwt) {
+          localStorage.setItem("jwt", response.jwt);
           router.push(ROUTES.HOME);
         }
       }
