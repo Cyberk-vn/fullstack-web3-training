@@ -224,9 +224,11 @@ export class AuthService {
 
   async callback(provider: SocialProviderType, accessToken: string) {
     const profile = await this._providerRegister.run(provider, accessToken)
+
     let user = await this._userService.findUser(profile.email, provider, {
       advantage: true,
     })
+
     if (!user) {
       user = await this._userService.create({
         username: profile.email,
