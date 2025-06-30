@@ -71,11 +71,17 @@ export function ConnectWalletButton({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-48">
-          <DropdownMenuItem onClick={handleCopyAddress} className="cursor-pointer">
+          <DropdownMenuItem
+            onClick={handleCopyAddress}
+            className="cursor-pointer"
+          >
             <Copy className="h-4 w-4 mr-2" />
             Copy Address
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={handleDisconnect} className="cursor-pointer text-red-600">
+          <DropdownMenuItem
+            onClick={handleDisconnect}
+            className="cursor-pointer text-red-600"
+          >
             <LogOut className="h-4 w-4 mr-2" />
             Disconnect
           </DropdownMenuItem>

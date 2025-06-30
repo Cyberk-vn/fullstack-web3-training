@@ -8,16 +8,17 @@ import { JwtGuard } from '@app/auth/guards/jwt.guard'
 import { ProfileUpdateDto } from './dtos/profile.update.dto'
 import { ParseJsonPipe } from '@app/core/pipes/parse-json.pipe'
 import { ParseBigIntPipe } from '@app/core/pipes/parse-bigint.pipe'
+import { Roles } from '@app/core/decorators/role.decorator'
 
 @ApiTags('profile')
 @Controller('profile')
 export class ProfileController {
   constructor(private readonly profileService: ProfileService) {}
 
-  // @Get()
-  // findAll(@Query('params', ParseJsonPipe) params) {
-  //   return this.profileService.findAll(params)
-  // }
+  @Get()
+  findAll(@Query('params', ParseJsonPipe) params) {
+    return this.profileService.findAll(params)
+  }
 
   @ApiOkResponse({ type: ProfileEntity })
   @ApiBearerAuth()
@@ -27,10 +28,11 @@ export class ProfileController {
     return this.profileService.findOne(user.profileId)
   }
 
-  // @Get(':id')
-  // findOne(@Param('id', ParseBigIntPipe) id: bigint) {
-  //   return this.profileService.findOne(id)
-  // }
+  @Get(':id')
+  @Roles('USER')
+  findOne(@Param('id', ParseBigIntPipe) id: bigint) {
+    return this.profileService.findOne(id)
+  }
 
   @ApiOkResponse({ type: ProfileEntity })
   @ApiBearerAuth()
