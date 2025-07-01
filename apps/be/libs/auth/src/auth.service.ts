@@ -239,6 +239,7 @@ export class AuthService {
         confirmed: true, // TODO send mail to confirm
         lastLoginAt: new Date(),
       })
+      user.profileId = (await this._profileService.init(user)).id
       return await this.issueToken(user, { updateLastLogin: false })
     } else {
       if (user.blocked) {
