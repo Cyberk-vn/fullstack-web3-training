@@ -19,7 +19,7 @@ export const SignInWithGoogleButton = () => {
   return (
     <Button
       onClick={handleSignWithGoogle}
-      className="w-fit bg-white text-[#171616] rounded-[4px]"
+      className="w-fit bg-white text-[#171616] rounded-[4px] hover:bg-[#262626] hover:text-white cursor-pointer h-[34px]"
     >
       Login
     </Button>
