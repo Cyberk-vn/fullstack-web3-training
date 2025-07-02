@@ -16,5 +16,12 @@ export const SignInWithGoogleButton = () => {
     window.location.href = authUrl;
   };
 
-  return <Button onClick={handleSignWithGoogle}>Sign In With Google</Button>;
+  return (
+    <Button
+      onClick={handleSignWithGoogle}
+      className="w-fit bg-white text-[#171616] rounded-[4px]"
+    >
+      Login
+    </Button>
+  );
 };
