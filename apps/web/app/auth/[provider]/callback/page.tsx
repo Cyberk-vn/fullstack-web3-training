@@ -5,10 +5,12 @@ import { ROUTES } from "@/lib/constants";
 import { Loader2 } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { useUserStore } from "@/lib/stores";
 
 export default function AuthCallbackPage() {
   const router = useRouter();
   const { provider } = useParams();
+  const { setJwt } = useUserStore();
 
   const handleCallback = async () => {
     if (typeof window !== "undefined") {
@@ -22,6 +24,7 @@ export default function AuthCallbackPage() {
         });
 
         if (response.jwt) {
+          setJwt(response.jwt);
           router.push(ROUTES.HOME);
         }
       }
