@@ -2,6 +2,7 @@
 
 import { authCallback } from "@/lib/api/auth";
 import { ROUTES } from "@/lib/constants";
+import { useUserStore } from "@/lib/store/user.store";
 import { Loader2 } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -10,6 +11,7 @@ export default function AuthCallbackPage() {
   const router = useRouter();
   const { provider } = useParams();
   const [error, setError] = useState<string | null>(null);
+  const { setJwt, setProfile } = useUserStore();
 
   const handleCallback = async () => {
     try {
@@ -25,10 +27,10 @@ export default function AuthCallbackPage() {
           });
 
           if (response.jwt) {
-            // Store the JWT token (you might want to use a proper auth store here)
-            localStorage.setItem("jwt", response.jwt);
-            if (response.jwtRefresh) {
-              localStorage.setItem("jwtRefresh", response.jwtRefresh);
+            // Store JWT in Zustand store
+            setJwt(response.jwt);
+            if (response.profile) {
+              setProfile(response.profile);
             }
 
             // Redirect to home page
