@@ -2,13 +2,17 @@
 
 import { authCallback } from "@/lib/api/auth";
 import { ROUTES } from "@/lib/constants";
+import { useUserStore } from "@/lib/stores";
 import { Loader2 } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { useShallow } from "zustand/shallow";
 
 export default function AuthCallbackPage() {
   const router = useRouter();
   const { provider } = useParams();
+
+  const setJwt = useUserStore(useShallow(state => state.setJwt));
 
   const handleCallback = async () => {
     if (typeof window !== "undefined") {
@@ -22,7 +26,7 @@ export default function AuthCallbackPage() {
         });
 
         if (response.jwt) {
-          localStorage.setItem("jwt", response.jwt);
+          setJwt(response.jwt);
           router.push(ROUTES.HOME);
         }
       }

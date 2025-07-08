@@ -1,7 +1,8 @@
 import baseAxios from "axios";
+import { useUserStore } from "../stores";
 
 export const axios = baseAxios.create({
-  baseURL: "http://localhost:4000",
+  baseURL: process.env.NEXT_PUBLIC_API_URL,
   headers: {
     "Content-Type": "application/json",
   },
@@ -9,7 +10,7 @@ export const axios = baseAxios.create({
 
 axios.interceptors.request.use(
   async config => {
-    const token = localStorage.getItem("jwt");
+    const token = useUserStore.getState().jwt;
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
