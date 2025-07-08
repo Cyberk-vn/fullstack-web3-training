@@ -1,6 +1,6 @@
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-import type { Profile } from '../types/profile';
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+import type { Profile } from "../types/profile";
 
 interface UserState {
   jwt: string | null;
@@ -12,15 +12,15 @@ interface UserState {
 
 export const useUserStore = create<UserState>()(
   persist(
-    (set) => ({
+    set => ({
       jwt: null,
       profile: null,
-      setJwt: (jwt) => set({ jwt }),
-      setProfile: (profile) => set({ profile }),
+      setJwt: jwt => set({ jwt }),
+      setProfile: profile => set({ profile }),
       clearUser: () => set({ jwt: null, profile: null }),
     }),
     {
-      name: 'user-storage',
+      name: "user-storage",
     }
   )
 );

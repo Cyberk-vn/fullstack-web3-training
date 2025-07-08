@@ -318,4 +318,11 @@ export class AuthService {
       console.error('Error blacklisting token:', error)
     }
   }
+
+  async siweGenerateNonce(address?: string): Promise<GenerateNonceDto> {
+    const nonce = generateSiweNonce()
+    const key = address ? `nonce:${address}:${nonce}` : `nonce:${nonce}`
+    await this._cacheManager.set(key, true, NONCE_EXPIRY_IN_MS)
+    return th.toInstanceSafe(GenerateNonceDto, { nonce })
+  }
 }

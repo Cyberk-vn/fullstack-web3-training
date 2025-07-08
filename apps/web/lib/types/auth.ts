@@ -1,9 +1,12 @@
+import { Profile } from "./profile";
+
 export interface TokenResponse {
-  jwt?: string | null;
-  jwtRefresh?: string | null;
-  user?: {
+  jwt: string;
+  jwtRefresh: string;
+  user: {
     profileId?: null | string | number;
   };
+  profile?: Profile | null;
 }
 
 export interface AuthCallbackParams {

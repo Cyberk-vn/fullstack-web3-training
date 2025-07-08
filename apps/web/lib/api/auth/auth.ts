@@ -1,5 +1,5 @@
-import { TokenResponse, AuthCallbackParams } from "../types";
-import { axios } from "./config";
+import { AuthCallbackParams, TokenResponse } from "@/lib/types/auth";
+import { axios } from "../config";
 
 export const authCallback = async ({
   accessToken,

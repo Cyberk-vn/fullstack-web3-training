@@ -16,7 +16,9 @@ export default function HomePage() {
   }, [jwt]);
 
   // Fetch profile from server if we don't have it yet but have a JWT
-  const { data: fetchedProfile } = useCurrentAccount({ enabled: !profile && !!jwt });
+  const { data: fetchedProfile } = useCurrentAccount({
+    enabled: !profile && !!jwt,
+  });
 
   useEffect(() => {
     if (fetchedProfile) {

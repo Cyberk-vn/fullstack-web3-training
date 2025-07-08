@@ -1,8 +1,9 @@
 "use client";
 
-import { authCallback } from "@/lib/api/auth";
+import { authCallback } from "@/lib/api/auth/auth";
 import { ROUTES } from "@/lib/constants";
 import { useUserStore } from "@/lib/store/user.store";
+import { Profile } from "@/lib/types/profile";
 import { Loader2 } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
