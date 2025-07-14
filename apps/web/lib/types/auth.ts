@@ -7,6 +7,7 @@ export interface TokenResponse {
     profileId?: null | string | number;
   };
   profile?: Profile | null;
+  isNewUser?: boolean;
 }
 
 export interface AuthCallbackParams {

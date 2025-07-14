@@ -7,6 +7,7 @@ import { Hash } from '@app/helper/hash.helper'
 import { UserService } from '@app/user/user.service'
 import { proH } from '@app/helper'
 import { UserEntity } from '@app/user/entities/user.entity'
+import { AuthService } from './auth.service'
 
 describe('Auth', () => {
   let tc: TestContext
@@ -174,6 +175,125 @@ describe('Auth', () => {
       userContext = tc.buildUserContext(res.body)
       res = await userContext.request((r) => r.get('/auth/me')).send()
       expect(res).toBeOK()
+    })
+  })
+})
+
+describe('SIWE Authentication Tests', () => {
+  let tc: TestContext
+  let app: INestApplication
+  let prismaService: PrismaService
+
+  beforeAll(async () => {
+    tc = await testHelper.createContext()
+    app = tc.app
+    prismaService = app.get(PrismaService)
+  })
+
+  afterAll(async () => {
+    await tc?.clean()
+  })
+
+  describe('SIWE Nonce Generation', () => {
+    test('Generate nonce without address', async () => {
+      const res = await tc.request().get('/auth/siwe/nonce')
+      expect(res).toBeOK()
+      expect(res.body.nonce).toBeDefined()
+      expect(typeof res.body.nonce).toBe('string')
+      expect(res.body.nonce.length).toBeGreaterThan(0)
+    })
+
+    test('Generate nonce with address', async () => {
+      const testWalletAddress = '0x742d35Cc6634C0532925a3b8D186dEecA45c3Cf9'
+      const res = await tc.request().get('/auth/siwe/nonce').query({ address: testWalletAddress })
+      expect(res).toBeOK()
+      expect(res.body.nonce).toBeDefined()
+      expect(typeof res.body.nonce).toBe('string')
+    })
+  })
+
+  describe('User and Profile Creation', () => {
+    test('Should create new user and profile for first-time wallet login', async () => {
+      const newWalletAddress = '0x' + Hash.randomHash().substring(0, 40)
+
+      // Get initial counts
+      const initialUserCount = await prismaService.user.count()
+      const initialProfileCount = await prismaService.profile.count()
+
+      // Create user using the service method
+      const authService = app.get(AuthService)
+      const user = await authService['_createUserWithWallet'](newWalletAddress)
+
+      expect(user).toBeDefined()
+      expect(user.username).toBe(newWalletAddress.toLowerCase())
+      expect(user.provider).toBe('wallet')
+      expect(user.confirmed).toBe(true)
+
+      // Verify counts increased
+      const finalUserCount = await prismaService.user.count()
+      const finalProfileCount = await prismaService.profile.count()
+
+      expect(finalUserCount).toBe(initialUserCount + 1)
+      expect(finalProfileCount).toBe(initialProfileCount + 1)
+
+      // Verify profile has correct wallet address
+      const profile = await prismaService.profile.findFirst({
+        where: { users: { some: { id: user.id } } },
+      })
+      expect(profile.walletAddress).toBe(newWalletAddress.toLowerCase())
+    })
+  })
+
+  describe('Logout and Token Invalidation', () => {
+    test('Should invalidate JWTs on logout', async () => {
+      const authService = app.get(AuthService)
+
+      // Create test user
+      const testWalletAddress = '0x' + Hash.randomHash().substring(0, 40)
+      const testUser = await authService['_createUserWithWallet'](testWalletAddress)
+
+      // Issue tokens
+      const tokenResponse = await authService.issueToken(testUser)
+      expect(tokenResponse.jwt).toBeDefined()
+
+      // Get original jwtValidFrom timestamp
+      const userBefore = await prismaService.user.findUnique({
+        where: { id: testUser.id },
+      })
+      const originalJwtValidFrom = userBefore.jwtValidFrom
+
+      // Wait to ensure timestamp difference
+      await proH.delay(1000)
+
+      // Perform logout
+      await authService.signOut(testUser.id)
+
+      // Verify jwtValidFrom was updated
+      const userAfter = await prismaService.user.findUnique({
+        where: { id: testUser.id },
+      })
+      expect(userAfter.jwtValidFrom.getTime()).toBeGreaterThan(originalJwtValidFrom.getTime())
+    })
+  })
+
+  describe('JWT Strategy Token Validation', () => {
+    test('Should reject tokens issued before jwtValidFrom', async () => {
+      const authService = app.get(AuthService)
+
+      // Create test user
+      const testWalletAddress = '0x' + Hash.randomHash().substring(0, 40)
+      const user = await authService['_createUserWithWallet'](testWalletAddress)
+
+      // Issue token
+      const tokenResponse = await authService.issueToken(user)
+
+      // Invalidate all tokens
+      await authService.signOut(user.id)
+
+      // Try to use old token - should fail
+      const res = await tc.request().get('/auth/me').set('Authorization', `Bearer ${tokenResponse.jwt}`)
+
+      expect(res.status).toBe(HttpStatus.UNAUTHORIZED)
     })
   })
 })

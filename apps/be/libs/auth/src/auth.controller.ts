@@ -165,17 +165,11 @@ export class AuthController {
   }
 
   @Post('signout')
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth()
   @UseGuards(JwtGuard)
-  @ApiBearerAuth() // Indicate JWT bearer auth is required
-  @HttpCode(HttpStatus.NO_CONTENT) // Use 204 No Content for successful signout
-  @ApiNoContentResponse({ description: 'Successfully signed out and blacklisted token.' }) // Add Swagger response
-  async signOut(@Req() req: Request): Promise<void> {
-    const authHeader = req.headers.authorization
-    if (authHeader && authHeader.startsWith('Bearer ')) {
-      const token = authHeader.substring(7) // Extract token part
-      await this.authService.signOut(token)
-    } else {
-      throw new UnauthorizedException('Authorization header missing or invalid.')
-    }
+  @ApiOkResponse({ description: 'Signs out the user and invalidates all JWTs.' })
+  async signOut(@CurUser() user: UserEntity): Promise<void> {
+    await this.authService.signOut(user.id)
   }
 }

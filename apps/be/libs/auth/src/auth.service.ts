@@ -1,4 +1,4 @@
-import { Hash, th } from '@app/helper'
+import { Hash, th, promiseHelper } from '@app/helper'
 import { UserService } from '@app/user'
 import {
   BadRequestException,
@@ -9,7 +9,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
-import { User, UserProvider } from '@prisma/client'
+import { User, UserProvider, Prisma } from '@prisma/client'
 import { UserJwtPayload as UserJwtPayload } from './models/user.jwt.payload'
 import { TokenRefreshResDto, TokenResDto } from './dtos/token.res.dto'
 import { RegisterDto } from './dtos/register.dto'
@@ -278,16 +278,26 @@ export class AuthService {
 
       const walletAddress = verifiedData.address
 
-      const user = await this._profileService.findUserByWalletAddress(walletAddress)
+      let user = await this._profileService.findUserByWalletAddress(walletAddress)
+      let isNewUser = false
+
       if (!user) {
-        throw new UnauthorizedException('Admin not found.')
+        // Create new user and profile for first-time wallet sign-in
+        isNewUser = true
+        user = await this._createUserWithWallet(walletAddress)
       }
 
       if (user.blocked) {
-        throw new UnauthorizedException('Admin account is blocked.')
+        throw new UnauthorizedException('User account is blocked.')
       }
 
-      return await this.issueToken(user)
+      const tokenResponse = await this.issueToken(user)
+
+      // Add isNewUser flag to the response
+      return th.toInstanceSafe(TokenResDto, {
+        ...tokenResponse,
+        isNewUser,
+      })
     } catch (error) {
       console.error('SIWE signature verification failed:', error)
       if (error instanceof Error && error.message.includes('Signature does not match')) {
@@ -297,25 +307,52 @@ export class AuthService {
     }
   }
 
-  async signOut(token: string): Promise<void> {
-    try {
-      const decoded = this.jwtService.decode(token) as { jti?: string; exp?: number }
-      const exp = decoded?.exp
+  /**
+   * Creates a new user and profile for wallet-based authentication
+   * @param walletAddress The wallet address to create user for
+   * @returns The created user entity
+   */
+  private async _createUserWithWallet(walletAddress: string): Promise<UserEntity> {
+    return await promiseHelper.transactionRetry(() =>
+      this._prisma.$transaction(
+        async (prisma) => {
+          // Create user with wallet provider
+          const user = await prisma.user.create({
+            data: {
+              username: walletAddress.toLowerCase(),
+              provider: UserProvider.wallet,
+              confirmed: true, // Wallet auth is considered confirmed
+              lastLoginAt: new Date(),
+              profile: {
+                create: {
+                  name: `User ${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`,
+                  walletAddress: walletAddress.toLowerCase(),
+                },
+              },
+            },
+            include: {
+              profile: true,
+            },
+          })
 
-      if (exp) {
-        const ttl = exp * 1000 - Date.now() // Calculate remaining time in milliseconds
-        if (ttl > 0) {
-          const key = `blacklist:${token}`
-          console.log(`Blacklisting token ${token} with TTL: ${ttl}ms`)
-          await this._cacheManager.set(key, 'true', ttl)
-        } else {
-          console.log(`Token ${token} already expired, not adding to blacklist.`)
-        }
-      } else {
-        console.warn('Could not extract expiry from token for blacklisting.')
-      }
+          return th.toInstanceSafe(UserEntity, user)
+        },
+        { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
+      ),
+    )
+  }
+
+  async signOut(userId: bigint): Promise<void> {
+    try {
+      // Update the user's jwtValidFrom timestamp to invalidate all existing JWTs
+      await this._userService.update(userId, {
+        jwtValidFrom: new Date(),
+      })
+
+      console.log(`Successfully invalidated all JWTs for user ${userId}`)
     } catch (error) {
-      console.error('Error blacklisting token:', error)
+      console.error('Error updating jwtValidFrom for user logout:', error)
+      throw new UnauthorizedException('Logout failed')
     }
   }
 

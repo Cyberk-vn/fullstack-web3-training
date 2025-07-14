@@ -36,6 +36,7 @@ npm-debug.log*
 *.pem
 
 # Private individual user cursor rules
-.cursor/rules/_*.mdc
+.cursor/rules
+*.md
 references
 .serena/
